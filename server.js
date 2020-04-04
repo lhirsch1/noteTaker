@@ -1,21 +1,23 @@
+
+//declaring dependencies
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const app = express();
 
+//setting port value. will search for environment variable first, then will set to 8080 if none is found
 var PORT =  process.env.PORT || 8080;
 
-
+//middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
 
-// require("./routes/apiRoutes")(app);
-// require("./routes/htmlRoutes")(app);
 
 //gets json data
-var notesData = require('./db/db');
+var notesDataRaw = fs.readFileSync('./db/db.json', "utf8");
+var notesData = JSON.parse(notesDataRaw);
 
 
 
@@ -28,6 +30,8 @@ app.listen(PORT, function() {
   app.get("/", function(req, res) {
     res.sendFile(path.join(__dirname, "/public/index.html"));
   });
+
+  
 
   //serves notes
   app.get("/notes", function(req, res) {
@@ -46,7 +50,13 @@ app.listen(PORT, function() {
     console.log("req body :",req.body)
     //pushes new note into nodesData array
     notesData.push(req.body)
+    fs.writeFile('./db/db.json', JSON.stringify(notesData), function(err){
+      if(err){
+        console.log(err)
+      }
+    })
     console.log("post push :", notesData)
+    
 
   })
   
@@ -58,35 +68,9 @@ app.listen(PORT, function() {
       console.log("delete route hit")
   })
 
-  // app.post("/api/tables", function(req, res) {
-  //   // if there are less than 5 tables
-  //   if (tableData.length < 5) {
-  //     // req.body is fed it's value via our middleware from server just
-  //       /*
-  //         app.use(express.urlencoded({ extended: true }));
-  //         app.use(express.json());
-  //       */
-  //     // req.body is an object containing the incoming data
-  //      /*
-  //     Below is our incoming data that will feed the req.body object
-  //     {
-  //       customerName: 'Tom'
-  //       phoneNumber: 555-555-5555
-  //       customerEmail: tom@gmail.com
-  //       customerID: 1
-  //     };
-  //      */
-  //     tableData.push(req.body);
-  //     // res is our response object
-  //     /*
-  //       Sends a JSON response. This method sends a response (with the correct content-type) that is the parameter converted to a JSON string using JSON.stringify().
+  //get"*" will serve the user index.html if they try to go to a page that does not exist
+  app.get("*",function(req,res){
+    res.sendFile(path.join(__dirname, "/public/index.html"))
+  });
 
-  //       The parameter can be any JSON type, including object, array, string, Boolean, number, or null, and you can also use it to convert other values to JSON.
-  //     */
-  //     res.json({ message: 'Added to current reservation! You may be seated' });
-  //   }
-  //   else {
-  //     waitListData.push(req.body);
-  //     res.json(false);
-  //   }
-  // });
+  

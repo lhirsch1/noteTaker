@@ -1,3 +1,4 @@
+//setting variables for DOM manipulation
 var $noteTitle = $(".note-title");
 var $noteText = $(".note-textarea");
 var $saveNoteBtn = $(".save-note");
@@ -6,7 +7,7 @@ var $noteList = $(".list-container .list-group");
 
 // activeNote is used to keep track of the note in the textarea
 var activeNote = {};
-console.log("howdy");
+
 // A function for getting all notes from the db
 var getNotes = function() {
   return $.ajax({
@@ -17,7 +18,7 @@ var getNotes = function() {
 
 // A function for saving a note to the db
 var saveNote = function(note) {
-  console.log("save call",note)
+  console.log("savenote");
   return $.ajax({
     url: "/api/notes",
     data: note,
@@ -35,6 +36,7 @@ var deleteNote = function(id) {
 
 // If there is an activeNote, display it, otherwise render empty inputs
 var renderActiveNote = function() {
+  //hides button after note is saved
   $saveNoteBtn.hide();
 
   if (activeNote.id) {
@@ -52,17 +54,27 @@ var renderActiveNote = function() {
 
 // Get the note data from the inputs, save it to the db and update the view
 var handleNoteSave = function() {
-  var newNote = {
-    title: $noteTitle.val(),
-    text: $noteText.val()
-  };
-  console.log("new Note ", newNote)
-  saveNote(newNote).then(function(data) {
-    console.log("save data " , data)
-    getAndRenderNotes();
-    renderActiveNote();
-  });
-  console.log("after save")
+  //get
+  // getNotes().then(function(data){
+  //   console.log("save data notes ", data.length)
+  //   let noteArrLength = data.length
+    var newNote = {
+  
+      id : (noteArrLength + 1),
+      title: $noteTitle.val(),
+      text: $noteText.val()
+    };
+    saveNote(newNote).then(function(data) {
+     console.log("NEW NOTE")
+      getAndRenderNotes();
+
+      renderActiveNote();
+  //   });
+   })
+   console.log("after savenote")
+  
+
+  
 };
 
 // Delete the clicked note
@@ -80,8 +92,7 @@ var handleNoteDelete = function(event) {
   }
   var noteID = $(note).attr("id");
 
-  deleteNote(noteID).then(function(data) {
-    console.log("delete data: ",noteID);
+  deleteNote(noteID).then(function() {
     getAndRenderNotes();
     renderActiveNote();
   });
@@ -135,6 +146,8 @@ var renderNoteList = function(notes) {
 var getAndRenderNotes = function() {
   return getNotes().then(function(data) {
     console.log("Get notes data :",data);
+    noteArrLength = data.length;
+    console.log("get data new ",noteArrLength)
     renderNoteList(data);
   });
 };
