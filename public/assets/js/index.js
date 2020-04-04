@@ -17,6 +17,7 @@ var getNotes = function() {
 
 // A function for saving a note to the db
 var saveNote = function(note) {
+  console.log("save call",note)
   return $.ajax({
     url: "/api/notes",
     data: note,
@@ -55,11 +56,13 @@ var handleNoteSave = function() {
     title: $noteTitle.val(),
     text: $noteText.val()
   };
-
+  console.log("new Note ", newNote)
   saveNote(newNote).then(function(data) {
+    console.log("save data " , data)
     getAndRenderNotes();
     renderActiveNote();
   });
+  console.log("after save")
 };
 
 // Delete the clicked note
@@ -72,11 +75,13 @@ var handleNoteDelete = function(event) {
     //.data();
 
   if (activeNote.id === note.id) {
+    console.log("if active", activeNote)
     activeNote = {};
   }
   var noteID = $(note).attr("id");
+
   deleteNote(noteID).then(function(data) {
-    console.log(data);
+    console.log("delete data: ",noteID);
     getAndRenderNotes();
     renderActiveNote();
   });
@@ -129,6 +134,7 @@ var renderNoteList = function(notes) {
 // Gets notes from the db and renders them to the sidebar
 var getAndRenderNotes = function() {
   return getNotes().then(function(data) {
+    console.log("Get notes data :",data);
     renderNoteList(data);
   });
 };
